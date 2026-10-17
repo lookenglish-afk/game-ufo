@@ -1,1850 +1,364 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UFO Dò Tín Hiệu - Game Gọi Tên Học Sinh Trả Bài</title>
-  <!-- Font chuẩn Tiếng Việt sắc nét 100% -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:ital,wght@0,500;0,600;0,700;0,800;0,900;1,700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --font-vn: 'Be Vietnam Pro', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-    }
-
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      user-select: none;
-      font-family: var(--font-vn);
-      -webkit-font-smoothing: antialiased;
-    }
-
-    body, html {
-      width: 100%;
-      height: 100%;
-      overflow: hidden;
-      background: #1a2634;
-    }
-
-    #game-wrapper {
-      position: relative;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-    }
-
-    canvas#ufoCanvas {
-      display: block;
-      width: 100%;
-      height: 100%;
-    }
-
-    /* THANH TRẠNG THÁI PHÍA TRÊN GIỐNG HỆT ẢNH MẪU */
-    .top-banner {
-      position: absolute;
-      top: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(18, 38, 36, 0.92);
-      border: 2px solid rgba(110, 231, 183, 0.55);
-      border-radius: 14px;
-      padding: 8px 16px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(8px);
-      z-index: 25;
-      white-space: nowrap;
-    }
-
-    .banner-status {
-      color: #ecfdf5;
-      font-size: 15px;
-      font-weight: 700;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .star-icon {
-      color: #6ee7b7;
-      font-size: 16px;
-      animation: spinStar 3s linear infinite;
-      display: inline-block;
-    }
-
-    @keyframes spinStar {
-      0%, 100% { transform: scale(1) rotate(0deg); opacity: 1; }
-      50% { transform: scale(1.25) rotate(180deg); opacity: 0.75; }
-    }
-
-    .student-count-pill {
-      background: #ffffff;
-      color: #0f172a;
-      font-weight: 800;
-      font-size: 14px;
-      padding: 5px 14px;
-      border-radius: 20px;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
-      cursor: pointer;
-      transition: transform 0.15s;
-    }
-
-    .student-count-pill:hover {
-      transform: scale(1.05);
-      background: #f0fdf4;
-    }
-
-    .banner-icon-btn {
-      background: rgba(255, 255, 255, 0.08);
-      color: #a7f3d0;
-      border: 1px solid rgba(167, 243, 208, 0.25);
-      width: 34px;
-      height: 34px;
-      border-radius: 9px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-
-    .banner-icon-btn:hover {
-      background: rgba(16, 185, 129, 0.3);
-      color: #ffffff;
-      border-color: #6ee7b7;
-      transform: translateY(-1px);
-    }
-
-    .banner-icon-btn svg {
-      width: 17px;
-      height: 17px;
-    }
-
-    /* THANH ĐIỀU KHIỂN PHÍA DƯỚI BÊN PHẢI GIỐNG HỆT ẢNH MẪU */
-    .bottom-control-bar {
-      position: absolute;
-      bottom: 18px;
-      right: 24px;
-      background: rgba(255, 255, 255, 0.94);
-      border: 2px solid #cbd5e1;
-      border-radius: 16px;
-      padding: 8px 14px;
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-      z-index: 25;
-      backdrop-filter: blur(8px);
-    }
-
-    .btn-ufo-action {
-      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-      color: #ffffff;
-      border: none;
-      padding: 11px 24px;
-      border-radius: 12px;
-      font-size: 15px;
-      font-weight: 800;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      box-shadow: 0 4px 0 #065f46, 0 6px 16px rgba(16, 185, 129, 0.4);
-      transition: all 0.15s;
-    }
-
-    .btn-ufo-action:hover:not(:disabled) {
-      transform: translateY(-2px);
-      filter: brightness(1.06);
-      box-shadow: 0 6px 0 #065f46, 0 10px 20px rgba(16, 185, 129, 0.5);
-    }
-
-    .btn-ufo-action:disabled {
-      background: #94a3b8;
-      box-shadow: none;
-      cursor: not-allowed;
-      opacity: 0.85;
-    }
-
-    .target-selector-group {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      padding-right: 4px;
-    }
-
-    .target-selector-group label {
-      font-size: 11.5px;
-      font-weight: 800;
-      color: #64748b;
-      margin-bottom: 3px;
-    }
-
-    .target-selector-group select {
-      background: #f1f5f9;
-      color: #0f172a;
-      border: 1.5px solid #cbd5e1;
-      border-radius: 8px;
-      padding: 4px 10px;
-      font-size: 14px;
-      font-weight: 800;
-      outline: none;
-      cursor: pointer;
-    }
-
-    /* POPUP KẾT QUẢ HỌC SINH BỊ UFO BẮT LÊN TRẢ BÀI */
-    #result-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(10, 20, 30, 0.82);
-      backdrop-filter: blur(7px);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 60;
-      animation: fadeIn 0.35s ease;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: scale(0.92); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    .ufo-result-card {
-      background: linear-gradient(180deg, #132a2e 0%, #0f172a 100%);
-      border: 3px solid #34d399;
-      border-radius: 28px;
-      width: 680px;
-      max-width: 94vw;
-      padding: 32px 28px 28px;
-      box-shadow: 0 0 60px rgba(52, 211, 153, 0.35), 0 25px 60px rgba(0,0,0,0.8);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      position: relative;
-      text-align: center;
-    }
-
-    .ufo-result-badge {
-      background: linear-gradient(135deg, #059669, #047857);
-      color: #a7f3d0;
-      border: 2.5px solid #6ee7b7;
-      padding: 8px 28px;
-      border-radius: 30px;
-      font-size: 18px;
-      font-weight: 900;
-      position: absolute;
-      top: -22px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.5);
-      letter-spacing: 0.6px;
-    }
-
-    .abducted-list-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 18px;
-      margin: 22px 0 24px;
-      width: 100%;
-    }
-
-    .abducted-student-item {
-      background: rgba(255, 255, 255, 0.06);
-      border: 2px solid rgba(110, 231, 183, 0.45);
-      border-radius: 20px;
-      padding: 18px 22px;
-      min-width: 180px;
-      flex: 1;
-      max-width: 260px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      box-shadow: inset 0 0 25px rgba(52, 211, 153, 0.12);
-      animation: floatCard 2.4s ease-in-out infinite;
-    }
-
-    @keyframes floatCard {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-6px); }
-    }
-
-    .abducted-avatar-circle {
-      width: 74px;
-      height: 74px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(110,231,183,0.4) 0%, rgba(16,185,129,0.1) 70%);
-      border: 2px solid #6ee7b7;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 12px;
-      font-size: 34px;
-    }
-
-    .abducted-name {
-      color: #ffffff;
-      font-size: 21px;
-      font-weight: 900;
-      margin-bottom: 6px;
-      line-height: 1.25;
-    }
-
-    .abducted-sub {
-      background: #fef08a;
-      color: #854d0e;
-      font-size: 12px;
-      font-weight: 900;
-      padding: 4px 12px;
-      border-radius: 12px;
-      text-transform: uppercase;
-    }
-
-    .result-actions {
-      display: flex;
-      gap: 14px;
-    }
-
-    .btn-continue-scan {
-      background: linear-gradient(180deg, #34d399 0%, #059669 100%);
-      color: #064e3b;
-      border: 2.5px solid #a7f3d0;
-      padding: 12px 34px;
-      font-size: 17px;
-      font-weight: 900;
-      border-radius: 14px;
-      cursor: pointer;
-      box-shadow: 0 5px 0 #065f46, 0 10px 25px rgba(16, 185, 129, 0.45);
-      transition: transform 0.15s;
-    }
-
-    .btn-continue-scan:hover {
-      transform: scale(1.05);
-    }
-
-    /* MODAL CÀI ĐẶT DANH SÁCH LỚP HỌC & LƯU TRỮ */
-    #settings-modal {
-      position: absolute;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(6px);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      z-index: 100;
-      padding: 16px;
-    }
-
-    .settings-box {
-      background: #1e293b;
-      color: #f8fafc;
-      width: 640px;
-      max-width: 96vw;
-      max-height: 92vh;
-      overflow-y: auto;
-      border-radius: 22px;
-      border: 2.5px solid #34d399;
-      padding: 24px 28px;
-      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75);
-    }
-
-    .settings-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #334155;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .settings-header h2 {
-      color: #6ee7b7;
-      font-size: 21px;
-      font-weight: 900;
-    }
-
-    .save-status-badge {
-      background: rgba(16, 185, 129, 0.2);
-      color: #34d399;
-      border: 1px solid #10b981;
-      padding: 5px 12px;
-      border-radius: 20px;
-      font-size: 13px;
-      font-weight: 800;
-    }
-
-    .saved-classes-bar {
-      background: #0f172a;
-      border: 1.5px solid #334155;
-      border-radius: 14px;
-      padding: 12px 14px;
-      margin-bottom: 16px;
-    }
-
-    .saved-classes-bar .bar-title {
-      font-size: 13px;
-      font-weight: 800;
-      color: #94a3b8;
-      margin-bottom: 10px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .class-chips {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .class-chip {
-      background: #1e293b;
-      color: #e2e8f0;
-      border: 1.5px solid #475569;
-      padding: 6px 14px;
-      border-radius: 10px;
-      font-size: 14px;
-      font-weight: 800;
-      cursor: pointer;
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      transition: all 0.15s;
-    }
-
-    .class-chip.active {
-      background: #10b981;
-      color: #064e3b;
-      border-color: #a7f3d0;
-    }
-
-    .class-chip .del-chip {
-      color: #f87171;
-      font-weight: 900;
-      padding: 0 4px;
-    }
-
-    .form-row {
-      margin-bottom: 15px;
-    }
-
-    .form-row label {
-      display: block;
-      font-size: 14.5px;
-      font-weight: 800;
-      color: #e2e8f0;
-      margin-bottom: 6px;
-    }
-
-    .form-row input[type="text"],
-    .form-row input[type="number"],
-    .form-row select,
-    .form-row textarea {
-      width: 100%;
-      background: #0f172a;
-      color: #ffffff;
-      border: 2px solid #475569;
-      border-radius: 12px;
-      padding: 10px 14px;
-      font-family: var(--font-vn);
-      font-size: 15px;
-      font-weight: 700;
-      outline: none;
-    }
-
-    .form-row textarea {
-      line-height: 1.55;
-      resize: vertical;
-    }
-
-    .form-row input:focus,
-    .form-row textarea:focus {
-      border-color: #34d399;
-    }
-
-    .grid-2 {
-      display: grid;
-      grid-template-columns: 1.2fr 1fr;
-      gap: 14px;
-    }
-
-    .quick-count-btns {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 8px;
-    }
-
-    .quick-btn {
-      background: #334155;
-      color: #f8fafc;
-      border: 1.5px solid #64748b;
-      padding: 6px 13px;
-      border-radius: 9px;
-      font-size: 13px;
-      font-weight: 800;
-      cursor: pointer;
-    }
-
-    .quick-btn:hover {
-      background: #10b981;
-      color: #064e3b;
-      border-color: #a7f3d0;
-    }
-
-    .backup-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #0f172a;
-      padding: 10px 14px;
-      border-radius: 12px;
-      border: 1px dashed #475569;
-      margin-top: 8px;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-
-    .backup-bar span {
-      font-size: 13px;
-      color: #94a3b8;
-      font-weight: 700;
-    }
-
-    .modal-footer {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      margin-top: 18px;
-      padding-top: 14px;
-      border-top: 1px solid #334155;
-    }
-
-    .btn-modal {
-      background: #334155;
-      color: #ffffff;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 12px;
-      font-weight: 800;
-      font-size: 15px;
-      cursor: pointer;
-    }
-
-    .btn-modal.save {
-      background: linear-gradient(135deg, #10b981, #059669);
-      color: #ffffff;
-    }
-
-    #toast-msg {
-      position: absolute;
-      top: 76px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-15px);
-      background: #065f46;
-      color: #ffffff;
-      border: 2px solid #34d399;
-      padding: 10px 24px;
-      border-radius: 30px;
-      font-weight: 800;
-      font-size: 14px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45);
-      z-index: 200;
-      opacity: 0;
-      pointer-events: none;
-      transition: all 0.3s ease;
-    }
-
-    #toast-msg.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UFO Gọi Học Sinh - Trò Chơi Điểm Danh Vui Nhộn</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter & Fredoka -->
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Fredoka', 'Inter', sans-serif;
+            overflow: hidden;
+            background: #090d16;
+        }
+        /* Hiệu ứng luồng sáng UFO hình thang */
+        .ufo-beam {
+            clip-path: polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%);
+            background: linear-gradient(to bottom, rgba(52, 211, 153, 0.6), rgba(16, 185, 129, 0.15));
+            pointer-events: none;
+            transition: all 0.5s ease-in-out;
+        }
+        @keyframes floatUfo {
+            0%, 100% { transform: translateY(0px) translateX(0px); }
+            50% { transform: translateY(-12px) translateX(8px); }
+        }
+        .animate-ufo {
+            animation: floatUfo 4s ease-in-out infinite;
+        }
+        @keyframes pulseBeam {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        .beam-pulse {
+            animation: pulseBeam 1.5s ease-in-out infinite;
+        }
+        /* Hiệu ứng học sinh bay lên */
+        @keyframes beamUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            80% { transform: translateY(-280px) scale(0.6); opacity: 0.9; }
+            100% { transform: translateY(-350px) scale(0.2); opacity: 0; }
+        }
+        .student-beaming {
+            animation: beamUp 1.5s ease-in forwards;
+        }
+    </style>
 </head>
-<body>
+<body class="w-screen h-screen flex flex-col justify-between select-none relative">
 
-<div id="game-wrapper">
-  <canvas id="ufoCanvas"></canvas>
+    <!-- KHU VỰC BẦU TRỜI & THÀNH PHỐ (CANVAS & HTML BACKGROUND) -->
+    <div id="game-container" class="absolute inset-0 w-full h-full overflow-hidden flex flex-col justify-between bg-gradient-to-b from-[#050814] via-[#101935] to-[#1e293b]">
+        
+        <!-- Các ngôi sao lấp lánh nền -->
+        <div class="absolute inset-0 opacity-40 pointer-events-none" id="stars-layer"></div>
 
-  <!-- THANH TRẠNG THÁI PHÍA TRÊN CHUẨN NHƯ TRONG ẢNH -->
-  <div class="top-banner">
-    <div class="banner-status">
-      <span class="star-icon">✦</span>
-      <span id="banner-status-text">Bám chặt nhé! UFO đang dò tín hiệu...</span>
-    </div>
-    <div class="student-count-pill" id="btn-pill-roster" title="Bấm để chỉnh sửa danh sách học sinh">
-      33 học sinh
-    </div>
-    <!-- Nút cây bút chỉnh sửa danh sách học sinh -->
-    <button class="banner-icon-btn" id="btn-edit-pen" title="Chỉnh sửa danh sách học sinh & lớp">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
-      </svg>
-    </button>
-    <!-- Nút bật/tắt âm thanh -->
-    <button class="banner-icon-btn" id="btn-sound-toggle" title="Bật/Tắt âm thanh">
-      <svg id="svg-sound" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-        <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
-        <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
-      </svg>
-    </button>
-    <!-- Nút Toàn màn hình -->
-    <button class="banner-icon-btn" id="btn-fullscreen" title="Toàn màn hình">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="3" width="7" height="7"></rect>
-        <rect x="14" y="3" width="7" height="7"></rect>
-        <rect x="14" y="14" width="7" height="7"></rect>
-        <rect x="3" y="14" width="7" height="7"></rect>
-      </svg>
-    </button>
-  </div>
+        <!-- MẶT TRĂNG VÀ MÂY -->
+        <div class="absolute top-8 left-12 w-20 h-20 bg-yellow-100 rounded-full shadow-[0_0_40px_rgba(254,240,138,0.6)] opacity-90"></div>
+        <div class="absolute top-16 left-32 w-32 h-10 bg-blue-900/30 rounded-full blur-sm"></div>
 
-  <!-- THANH ĐIỀU KHIỂN GÓC DƯỚI PHẢI CHUẨN NHƯ TRONG ẢNH -->
-  <div class="bottom-control-bar">
-    <button class="btn-ufo-action" id="btn-start-scan">
-      <span>🛸 Bắt đầu quét bắt</span>
-    </button>
-    <div class="target-selector-group">
-      <label>Số học sinh gọi:</label>
-      <select id="select-abduct-count">
-        <option value="1">1 học sinh</option>
-        <option value="2">2 học sinh</option>
-        <option value="3" selected>3 học sinh</option>
-        <option value="4">4 học sinh</option>
-        <option value="5">5 học sinh</option>
-      </select>
-    </div>
-  </div>
+        <!-- THANH ĐIỀU KHIỂN & TRẠNG THÁI TRÊN CÙNG -->
+        <header class="relative z-20 flex flex-wrap justify-between items-center px-6 py-4 bg-slate-900/80 backdrop-blur-md border-b border-slate-700/50 shadow-lg">
+            <div class="flex items-center space-x-3">
+                <div class="bg-emerald-500 text-slate-950 font-bold px-3 py-1.5 rounded-xl shadow flex items-center space-x-2">
+                    <i class="fa-solid fa-satellite text-lg animate-spin"></i>
+                    <span id="header-status">UFO đang dò tín hiệu...</span>
+                </div>
+                <div class="bg-slate-800 text-emerald-400 font-bold px-4 py-1.5 rounded-xl border border-emerald-500/30 flex items-center space-x-2">
+                    <i class="fa-solid fa-users"></i>
+                    <span id="counter-display">0 / 3 học sinh</span>
+                </div>
+            </div>
 
-  <!-- POPUP HIỂN THỊ CÁC HỌC SINH ĐÃ BỊ UFO BẮT LÊN TRẢ BÀI -->
-  <div id="result-overlay">
-    <div class="ufo-result-card">
-      <div class="ufo-result-badge">🛸 TÍN HIỆU ĐÃ CHỐT - MỜI LÊN BẢNG</div>
-      <p style="color: #94a3b8; font-size: 14.5px; font-weight: 700; margin-top: 6px;">
-        Những bạn sau đã tuột tay và được người ngoài hành tinh chọn lên trả bài:
-      </p>
-      <div class="abducted-list-container" id="abducted-results-box"></div>
-      <div class="result-actions">
-        <button class="btn-continue-scan" id="btn-play-again">🔄 Quét Lượt Tiếp Theo</button>
-      </div>
-    </div>
-  </div>
+            <div class="flex items-center space-x-3 mt-2 sm:mt-0">
+                <button onclick="openSettings()" class="bg-slate-700 hover:bg-slate-600 text-white font-semibold px-4 py-2 rounded-xl transition shadow flex items-center space-x-2">
+                    <i class="fa-solid fa-gear"></i>
+                    <span>Danh sách HS</span>
+                </button>
+                <button onclick="resetGame()" class="bg-rose-600/80 hover:bg-rose-500 text-white font-semibold px-4 py-2 rounded-xl transition shadow flex items-center space-x-2">
+                    <i class="fa-solid fa-rotate-right"></i>
+                    <span>Chơi lại</span>
+                </button>
+            </div>
+        </header>
 
-  <!-- MODAL QUẢN LÝ DANH SÁCH HỌC SINH & TỰ ĐỘNG LƯU -->
-  <div id="settings-modal">
-    <div class="settings-box">
-      <div class="settings-header">
-        <h2>📋 Danh Sách Học Sinh & Cài Đặt UFO</h2>
-        <span class="save-status-badge">✓ Tự động lưu cho lần sau</span>
-      </div>
-
-      <div class="saved-classes-bar">
-        <div class="bar-title">
-          <span>CÁC LỚP ĐÃ LƯU TRONG MÁY (Bấm vào để chọn lớp):</span>
-          <button type="button" class="quick-btn" id="btn-new-class">+ Tạo lớp mới</button>
+        <!-- UFO VÀ LUỒNG SÁNG -->
+        <div id="ufo-wrapper" class="absolute top-20 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center pointer-events-none transition-all duration-1000 animate-ufo" style="width: 320px;">
+            <!-- Đèn đĩa bay -->
+            <div class="relative flex justify-center items-center w-72 h-20 bg-gradient-to-r from-slate-400 via-slate-200 to-slate-400 rounded-full shadow-[0_0_30px_rgba(52,211,153,0.8)] border-2 border-emerald-300">
+                <!-- Vòm kính cockpit -->
+                <div class="absolute -top-10 w-24 h-16 bg-gradient-to-b from-cyan-300/80 to-teal-500/50 rounded-t-full border-t border-cyan-200 flex justify-center items-center overflow-hidden">
+                    <div class="w-3 h-3 bg-green-400 rounded-full animate-ping"></div>
+                </div>
+                <!-- Đèn nhấp nháy quanh thân UFO -->
+                <div class="absolute bottom-1 w-full flex justify-around px-6">
+                    <div class="w-2.5 h-2.5 bg-yellow-400 rounded-full animate-pulse"></div>
+                    <div class="w-2.5 h-2.5 bg-rose-500 rounded-full animate-pulse delay-100"></div>
+                    <div class="w-2.5 h-2.5 bg-cyan-400 rounded-full animate-pulse delay-200"></div>
+                    <div class="w-2.5 h-2.5 bg-yellow-400 rounded-full animate-pulse delay-300"></div>
+                </div>
+            </div>
+            <!-- Luồng sáng chiếu xuống -->
+            <div id="ufo-beam" class="ufo-beam w-80 h-96 beam-pulse mt-[-4px] opacity-75"></div>
         </div>
-        <div class="class-chips" id="saved-classes-list"></div>
-      </div>
 
-      <div class="grid-2">
-        <div class="form-row">
-          <label>Tên Lớp Học:</label>
-          <input type="text" id="input-class-name" value="10A1" placeholder="VD: Lớp 10A1">
+        <!-- KHU VỰC ĐƯỜNG PHỐ & HỌC SINH ĐỨNG (DƯỚI ĐẤT) -->
+        <div class="relative z-10 w-full flex-grow flex items-end pb-12 px-6">
+            <!-- Nền tòa nhà thành phố phía sau -->
+            <div class="absolute bottom-24 inset-x-0 h-48 bg-gradient-to-t from-[#111827] to-transparent flex justify-around items-end opacity-60 pointer-events-none px-4">
+                <div class="w-24 h-36 bg-slate-800 rounded-t-lg"></div>
+                <div class="w-32 h-44 bg-slate-900 rounded-t-lg relative">
+                    <div class="grid grid-cols-2 gap-2 p-2">
+                        <div class="w-4 h-6 bg-yellow-300/40 rounded"></div>
+                        <div class="w-4 h-6 bg-yellow-300/20 rounded"></div>
+                    </div>
+                </div>
+                <div class="w-28 h-40 bg-slate-800 rounded-t-lg"></div>
+                <div class="w-36 h-48 bg-slate-950 rounded-t-lg"></div>
+            </div>
+
+            <!-- Mặt đường thành phố -->
+            <div class="absolute bottom-0 inset-x-0 h-28 bg-[#151c2f] border-t-4 border-slate-700/80 flex items-center px-8 shadow-inner">
+                <!-- Đèn đường -->
+                <div class="absolute bottom-24 left-16 w-3 h-28 bg-slate-600 rounded-t">
+                    <div class="absolute -top-3 -left-4 w-10 h-4 bg-slate-500 rounded-full shadow-[0_10px_20px_rgba(253,224,71,0.6)]"></div>
+                </div>
+                <div class="absolute bottom-24 right-20 w-3 h-28 bg-slate-600 rounded-t">
+                    <div class="absolute -top-3 -left-4 w-10 h-4 bg-slate-500 rounded-full shadow-[0_10px_20px_rgba(253,224,71,0.6)]"></div>
+                </div>
+            </div>
+
+            <!-- Lưới chứa các học sinh trên đường (đứng cạnh xe máy) -->
+            <div id="students-grid" class="relative z-20 w-full max-w-6xl mx-auto flex flex-wrap justify-center items-end gap-6 pb-6">
+                <!-- Các nhân vật sẽ được render bằng JavaScript -->
+            </div>
         </div>
-        <div class="form-row">
-          <label>Số lượng UFO hút mỗi lượt:</label>
-          <select id="input-catch-count">
-            <option value="1">1 học sinh / lượt</option>
-            <option value="2">2 học sinh / lượt</option>
-            <option value="3" selected>3 học sinh / lượt</option>
-            <option value="4">4 học sinh / lượt</option>
-            <option value="5">5 học sinh / lượt</option>
-          </select>
+
+        <!-- NÚT GỌI HỌC SINH (HÀNH ĐỘNG CHÍNH) -->
+        <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-40">
+            <button id="call-btn" onclick="callStudent()" class="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-extrabold text-xl px-8 py-4 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.6)] border-2 border-emerald-200 transform hover:scale-105 active:scale-95 transition flex items-center space-x-3">
+                <i class="fa-solid fa-bolt text-2xl animate-bounce"></i>
+                <span>Bắt Đầu Gọi Học Sinh!</span>
+            </button>
         </div>
-      </div>
-
-      <div class="form-row">
-        <label>Điều chỉnh Sĩ số (<span id="lbl-num-count">33</span> học sinh):</label>
-        <input type="number" id="input-student-count" min="2" max="65" value="33">
-        <div class="quick-count-btns">
-          <button type="button" class="quick-btn" data-count="15">15 HS</button>
-          <button type="button" class="quick-btn" data-count="25">25 HS</button>
-          <button type="button" class="quick-btn" data-count="33">33 HS (Như ảnh)</button>
-          <button type="button" class="quick-btn" data-count="40">40 HS</button>
-          <button type="button" class="quick-btn" data-count="50">50 HS</button>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <label>Danh sách tên học sinh (Mỗi dòng 1 tên - Tự động lưu vào trình duyệt):</label>
-        <textarea id="input-student-list" rows="7" placeholder="Nhập mỗi tên học sinh trên 1 dòng..."></textarea>
-
-        <div class="backup-bar">
-          <span>Sao lưu hoặc nạp danh sách từ file máy tính (.txt):</span>
-          <div style="display:flex; gap:8px;">
-            <input type="file" id="file-import" accept=".txt" style="display:none">
-            <button type="button" class="quick-btn" id="btn-import-txt">Nhập file .txt</button>
-            <button type="button" class="quick-btn" id="btn-export-txt">Tải về .txt</button>
-          </div>
-        </div>
-      </div>
-
-      <div class="modal-footer">
-        <button class="btn-modal" id="btn-close-settings">Đóng</button>
-        <button class="btn-modal save" id="btn-save-settings">💾 Lưu Danh Sách & Áp Dụng</button>
-      </div>
     </div>
-  </div>
 
-  <div id="toast-msg">Đã lưu danh sách học sinh!</div>
-</div>
-
-<script>
-// =====================================================
-// 1. DỮ LIỆU HỌC SINH (CHUẨN THEO TÊN TRONG ẢNH MẪU) & LOCALSTORAGE
-// =====================================================
-const STORAGE_KEY = 'WEBGAME_UFO_ABDUCTION_SAVED_V1';
-
-const DEFAULT_UFO_NAMES = [
-  "CAO XUÂN TIẾN", "NGUYỄN QUANG HUY", "NGUYỄN HOÀNG NAM", "NGUYỄN MẠNH ĐỨC",
-  "HOÀNG ĐỨC ANH", "ĐỖ VĂN KHÁNH", "HOÀNG THẾ LONG", "ĐỖ THẾ KHÁNH",
-  "ĐÀO ĐỨC THẮNG", "NGUYỄN HOÀNG LONG", "CAO MINH QUÂN", "ĐINH TIẾN ĐẠT",
-  "NGUYỄN VĂN HÙNG", "VŨ PHẠM GIA BẢO", "ĐỖ VĂN MINH", "LÊ HOÀNG VIỆT",
-  "PHẠM MINH TUẤN", "TRẦN QUỐC BẢO", "BÙI ĐỨC DUY", "ĐẶNG HOÀNG SƠN",
-  "VÕ MINH KHÔI", "LÝ TUẤN KIỆT", "HỒ ANH DŨNG", "NGÔ THÀNH ĐẠT",
-  "DƯƠNG QUANG MINH", "TRƯƠNG ĐỨC TÀI", "ĐINH HOÀNG HIẾU", "PHAN VĂN KHẢI",
-  "LƯƠNG GIA HUY", "HÀ MINH NHẬT", "TẠ QUỐC KHÁNH", "CHU VĂN BÌNH",
-  "MAI HOÀNG PHÚC"
-];
-
-let savedClasses = {
-  "Lớp 10A1": [...DEFAULT_UFO_NAMES]
-};
-let className = "Lớp 10A1";
-let studentNames = [...DEFAULT_UFO_NAMES];
-let targetCatchCount = 3;
-let soundEnabled = true;
-
-// Đọc chung dữ liệu đã lưu từ LocalStorage
-function loadSavedData() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    const data = JSON.parse(raw);
-    if (data.savedClasses && Object.keys(data.savedClasses).length > 0) {
-      savedClasses = data.savedClasses;
-    }
-    if (data.currentClass && savedClasses[data.currentClass]) {
-      className = data.currentClass;
-      studentNames = [...savedClasses[className]];
-    } else {
-      const firstKey = Object.keys(savedClasses)[0];
-      className = firstKey;
-      studentNames = [...savedClasses[firstKey]];
-    }
-    if (data.targetCatchCount) {
-      targetCatchCount = parseInt(data.targetCatchCount, 10) || 3;
-    }
-  } catch (e) {
-    console.warn("Lỗi đọc localStorage:", e);
-  }
-}
-
-function saveToLocalStorage(msg = "Đã lưu danh sách học sinh cho lần sau!") {
-  try {
-    savedClasses[className] = [...studentNames];
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({
-      currentClass: className,
-      targetCatchCount: targetCatchCount,
-      savedClasses: savedClasses
-    }));
-    if (msg) showToast(msg);
-  } catch (e) {
-    console.warn("Lỗi lưu localStorage:", e);
-  }
-}
-
-function showToast(text) {
-  const el = document.getElementById('toast-msg');
-  el.innerText = text;
-  el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2600);
-}
-
-loadSavedData();
-
-// Các câu cầu cứu khi bị tia UFO hút
-const PANIC_SHOUTS = [
-  "Cứu em với!", "Bám chặt vào!!", "Tuột tay rồi á á!",
-  "Đừng hút em!", "Em chưa thuộc bài!", "Gió mạnh quá!!",
-  "Níu chân tui với!", "Cột đèn trơn quá!", "Tha cho em UFO ơi!"
-];
-
-// =====================================================
-// 2. HỆ THỐNG ÂM THANH SCI-FI UFO (WEB AUDIO API)
-// =====================================================
-const AudioCtx = window.AudioContext || window.webkitAudioContext;
-let audioCtx = null;
-let ufoHumInterval = null;
-
-function ensureAudio() {
-  if (!audioCtx) audioCtx = new AudioCtx();
-  if (audioCtx.state === 'suspended') audioCtx.resume();
-}
-
-function playSound(type) {
-  if (!soundEnabled) return;
-  ensureAudio();
-  const now = audioCtx.currentTime;
-
-  if (type === 'beam_on') {
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(220, now);
-    osc.frequency.exponentialRampToValueAtTime(660, now + 0.45);
-    gain.gain.setValueAtTime(0.25, now);
-    gain.gain.linearRampToValueAtTime(0.01, now + 0.45);
-    osc.start(now); osc.stop(now + 0.45);
-  } else if (type === 'suck_up') {
-    // Tiếng hút học sinh lên đĩa bay (Sci-fi slide up)
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.type = 'triangle';
-    osc.frequency.setValueAtTime(300, now);
-    osc.frequency.exponentialRampToValueAtTime(1250, now + 0.55);
-    gain.gain.setValueAtTime(0.3, now);
-    gain.gain.linearRampToValueAtTime(0.01, now + 0.55);
-    osc.start(now); osc.stop(now + 0.55);
-  } else if (type === 'complete') {
-    [523.25, 659.25, 783.99, 1046.5].forEach((freq, i) => {
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.connect(gain); gain.connect(audioCtx.destination);
-      osc.type = 'sine';
-      osc.frequency.setValueAtTime(freq, now + i * 0.09);
-      gain.gain.setValueAtTime(0.22, now + i * 0.09);
-      gain.gain.linearRampToValueAtTime(0.01, now + i * 0.09 + 0.35);
-      osc.start(now + i * 0.09); osc.stop(now + i * 0.09 + 0.35);
-    });
-  }
-}
-
-function startUfoHum() {
-  stopUfoHum();
-  if (!soundEnabled) return;
-  ensureAudio();
-  let step = 0;
-  const freqs = [180, 210, 240, 210];
-  ufoHumInterval = setInterval(() => {
-    if (!soundEnabled || gameState !== 'SCANNING') return;
-    const now = audioCtx.currentTime;
-    const osc = audioCtx.createOscillator();
-    const gain = audioCtx.createGain();
-    osc.connect(gain); gain.connect(audioCtx.destination);
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(freqs[step % freqs.length], now);
-    gain.gain.setValueAtTime(0.07, now);
-    gain.gain.exponentialRampToValueAtTime(0.008, now + 0.18);
-    osc.start(now); osc.stop(now + 0.18);
-    step++;
-  }, 190);
-}
-
-function stopUfoHum() {
-  if (ufoHumInterval) {
-    clearInterval(ufoHumInterval);
-    ufoHumInterval = null;
-  }
-}
-
-// =====================================================
-// 3. THIẾT LẬP CANVAS & VẬT THỂ BÁM TRÊN ĐƯỜNG PHỐ
-// =====================================================
-const canvas = document.getElementById('ufoCanvas');
-const ctx = canvas.getContext('2d');
-
-let W = window.innerWidth;
-let H = window.innerHeight;
-canvas.width = W;
-canvas.height = H;
-
-let gameState = 'IDLE'; // IDLE | SCANNING | RESULT
-let globalTime = 0;
-let scanTimer = 0;
-
-// UFO Object
-const ufo = {
-  x: W * 0.48,
-  y: H * 0.20,
-  baseY: H * 0.20,
-  targetX: W * 0.48,
-  beamPower: 0.25, // 0 -> 1
-  caughtCount: 0,
-  totalToCatch: 3
-};
-
-// Danh sách các điểm bám trên phố (Cột đèn cao áp, Xe máy tay ga, Xe Taxi)
-let anchors = [];
-let students = [];
-let abductedStudents = [];
-let nextAbductTime = 0;
-let stars = [];
-
-function initStars() {
-  stars = [];
-  for (let i = 0; i < 65; i++) {
-    stars.push({
-      x: Math.random() * W,
-      y: Math.random() * (H * 0.45),
-      r: 1 + Math.random() * 1.8,
-      phase: Math.random() * Math.PI * 2
-    });
-  }
-}
-
-// Khởi tạo các Cột đèn đường, Xe máy, Xe Taxi giống bố cục trong ảnh
-function buildStreetAnchors() {
-  anchors = [
-    // 3 Cột đèn đường chính mà học sinh bám thành từng chùm dọc thân cột
-    { type: 'lamp_tall', x: W * 0.28, y: H * 0.90, topY: H * 0.42 },
-    { type: 'lamp_tall', x: W * 0.65, y: H * 0.89, topY: H * 0.40 },
-    { type: 'lamp_tall', x: W * 0.77, y: H * 0.86, topY: H * 0.41 },
-    // Cột đèn nhỏ hai bên
-    { type: 'lamp_small', x: W * 0.05, y: H * 0.84, topY: H * 0.62 },
-    { type: 'lamp_small', x: W * 0.93, y: H * 0.82, topY: H * 0.56 },
-    // Xe máy tay ga & Xe Taxi
-    { type: 'scooter_red', x: W * 0.08, y: H * 0.93, topY: H * 0.84 },
-    { type: 'scooter_red', x: W * 0.35, y: H * 0.92, topY: H * 0.82 },
-    { type: 'scooter_dark', x: W * 0.52, y: H * 0.69, topY: H * 0.63 },
-    { type: 'scooter_dark', x: W * 0.78, y: H * 0.66, topY: H * 0.60 },
-    { type: 'taxi', x: W * 0.81, y: H * 0.77, topY: H * 0.68 },
-    { type: 'scooter_blue', x: W * 0.89, y: H * 0.84, topY: H * 0.74 }
-  ];
-}
-
-// Rải đều học sinh bám vào các cột đèn, xe máy, xe hơi giống ảnh mẫu
-function createStudents() {
-  buildStreetAnchors();
-  students = [];
-  abductedStudents = [];
-  ufo.caughtCount = 0;
-  ufo.totalToCatch = Math.min(targetCatchCount, studentNames.length);
-
-  document.getElementById('btn-pill-roster').innerText = `${studentNames.length} học sinh`;
-  document.getElementById('select-abduct-count').value = String(targetCatchCount);
-
-  const shirtPalette = ['#ffffff', '#fde047', '#38bdf8', '#f43f5e', '#a78bfa', '#fb923c'];
-  const pantsPalette = ['#1e293b', '#334155', '#1e3a8a', '#3f3f46'];
-
-  // Các cột đèn chính ưu tiên nhiều học sinh bám dọc từ trên xuống dưới như ảnh
-  const mainHoldingSpots = [
-    { ax: W * 0.28, minY: H * 0.56, maxY: H * 0.86 }, // Cột đèn trái
-    { ax: W * 0.65, minY: H * 0.50, maxY: H * 0.84 }, // Cột đèn giữa
-    { ax: W * 0.89, minY: H * 0.56, maxY: H * 0.82 }, // Cụm bên phải
-    { ax: W * 0.36, minY: H * 0.62, maxY: H * 0.85 }, // Cụm phụ trái
-    { ax: W * 0.81, minY: H * 0.58, maxY: H * 0.78 }  // Cụm quanh xe taxi
-  ];
-
-  for (let i = 0; i < studentNames.length; i++) {
-    const cluster = mainHoldingSpots[i % mainHoldingSpots.length];
-    const progress = (Math.floor(i / mainHoldingSpots.length) % 7) / 6;
-    const holdX = cluster.ax + (Math.random() - 0.5) * 32;
-    const holdY = cluster.minY + progress * (cluster.maxY - cluster.minY) + (Math.random() - 0.5) * 18;
-
-    // Cắt ngắn tên hiển thị trên nhãn giống ảnh ("NGUYỄN HOÀ...", "CAO MINH QU...") nhưng lưu tên đầy đủ
-    const fullName = studentNames[i];
-    const displayTag = fullName.length > 14 ? fullName.substring(0, 12) + '...' : fullName;
-
-    students.push({
-      id: i,
-      fullName: fullName,
-      displayTag: displayTag,
-      x: holdX,
-      y: holdY,
-      anchorX: holdX,
-      anchorY: holdY,
-      shirtColor: shirtPalette[i % shirtPalette.length],
-      pantsColor: pantsPalette[i % pantsPalette.length],
-      hairColor: ['#1c1917', '#3e2723', '#27272a'][i % 3],
-      bodyAngle: (i % 2 === 0 ? 1 : -1) * (0.85 + Math.random() * 0.45), // Bay ngang bám cột
-      phase: Math.random() * Math.PI * 2,
-      state: 'CLINGING', // CLINGING | BEING_SUCKED | ABDUCTED
-      suckProgress: 0,
-      isChosenVictim: false,
-      shoutText: '',
-      shoutTimer: 0
-    });
-  }
-}
-
-window.addEventListener('resize', () => {
-  W = window.innerWidth;
-  H = window.innerHeight;
-  canvas.width = W;
-  canvas.height = H;
-  ufo.x = W * 0.48;
-  ufo.baseY = H * 0.20;
-  initStars();
-  createStudents();
-});
-
-// =====================================================
-// 4. VẼ BỐI CẢNH ĐƯỜNG PHỐ ĐÊM & ĐĨA BAY UFO (CHUẨN ẢNH MẪU)
-// =====================================================
-function drawNightCityBackground() {
-  // 1. Bầu trời đêm xanh than
-  const skyGrad = ctx.createLinearGradient(0, 0, 0, H);
-  skyGrad.addColorStop(0, '#1e2c3a');
-  skyGrad.addColorStop(0.55, '#2c4251');
-  skyGrad.addColorStop(1, '#3b5963');
-  ctx.fillStyle = skyGrad;
-  ctx.fillRect(0, 0, W, H);
-
-  // Sao lấp lánh trên trời
-  stars.forEach(st => {
-    const alpha = 0.35 + 0.55 * Math.sin(globalTime * 2.5 + st.phase);
-    ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
-    ctx.beginPath();
-    ctx.arc(st.x, st.y, st.r, 0, Math.PI * 2);
-    ctx.fill();
-  });
-
-  // 2. Các dãy nhà phố hai bên với ô cửa sổ sáng đèn vàng giống ảnh
-  // Tòa nhà bên trái
-  drawBuilding(0, H * 0.30, W * 0.22, H * 0.48, '#525266', [
-    { x: 0.18, y: 0.14, lit: true },
-    { x: 0.58, y: 0.14, lit: true }
-  ], "BÁNH MÌ");
-
-  // Tòa nhà lùi phía sau bên trái
-  drawBuilding(W * 0.21, H * 0.24, W * 0.24, H * 0.52, '#475569', [
-    { x: 0.15, y: 0.10, lit: false },
-    { x: 0.55, y: 0.10, lit: false },
-    { x: 0.15, y: 0.30, lit: true },
-    { x: 0.55, y: 0.30, lit: true }
-  ], "");
-
-  // Tòa nhà bên phải có chữ "PHỞ HUẾ" giống ảnh
-  drawBuilding(W * 0.67, H * 0.22, W * 0.33, H * 0.54, '#5c5460', [
-    { x: 0.12, y: 0.10, lit: false },
-    { x: 0.38, y: 0.12, lit: true },
-    { x: 0.68, y: 0.12, lit: false }
-  ], "PHỞ HUẾ");
-
-  // Đường dây điện căng ngang bầu trời đêm
-  ctx.strokeStyle = 'rgba(30, 41, 59, 0.55)';
-  ctx.lineWidth = 1.8;
-  for (let i = 0; i < 3; i++) {
-    ctx.beginPath();
-    ctx.moveTo(0, H * (0.27 + i * 0.02));
-    ctx.quadraticCurveTo(W * 0.5, H * (0.34 + i * 0.02), W, H * (0.29 + i * 0.02));
-    ctx.stroke();
-  }
-
-  // 3. Mặt đường nhựa phía dưới
-  const roadTop = H * 0.64;
-  const roadGrad = ctx.createLinearGradient(0, roadTop, 0, H);
-  roadGrad.addColorStop(0, '#5f7d7c');
-  roadGrad.addColorStop(1, '#486366');
-  ctx.fillStyle = roadGrad;
-  ctx.fillRect(0, roadTop, W, H - roadTop);
-
-  // Vạch kẻ đường đứt nét
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
-  ctx.lineWidth = 4;
-  ctx.setLineDash([28, 22]);
-  ctx.beginPath();
-  ctx.moveTo(0, H * 0.80);
-  ctx.lineTo(W, H * 0.76);
-  ctx.stroke();
-  ctx.setLineDash([]);
-}
-
-function drawBuilding(x, y, w, h, color, windows, signText) {
-  ctx.fillStyle = color;
-  ctx.fillRect(x, y, w, h);
-
-  // Mái viền
-  ctx.fillStyle = 'rgba(0,0,0,0.22)';
-  ctx.fillRect(x - 4, y, w + 8, 10);
-
-  // Các cửa sổ
-  windows.forEach(win => {
-    const wx = x + w * win.x;
-    const wy = y + h * win.y;
-    const ww = w * 0.20;
-    const wh = h * 0.16;
-
-    ctx.fillStyle = win.lit ? '#fde68a' : '#334155';
-    ctx.strokeStyle = '#1e293b';
-    ctx.lineWidth = 2.5;
-    ctx.fillRect(wx, wy, ww, wh);
-    ctx.strokeRect(wx, wy, ww, wh);
-
-    // Khung song cửa sổ
-    ctx.beginPath();
-    ctx.moveTo(wx + ww / 2, wy);
-    ctx.lineTo(wx + ww / 2, wy + wh);
-    ctx.stroke();
-  });
-
-  if (signText) {
-    ctx.fillStyle = 'rgba(254, 240, 138, 0.25)';
-    ctx.font = '900 18px "Be Vietnam Pro", sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(signText, x + w * 0.6, y + h * 0.45);
-  }
-}
-
-// Vẽ Luồng Sáng Hút Màu Xanh Ngọc Khổng Lồ Từ Đĩa Bay Chiếu Xuống
-function drawTractorBeam() {
-  const beamTopY = ufo.y + 28;
-  const topHalfW = 72;
-  const bottomHalfW = W * (0.48 + ufo.beamPower * 0.16);
-
-  ctx.save();
-  const beamGrad = ctx.createLinearGradient(ufo.x, beamTopY, ufo.x, H);
-  const alphaTop = 0.48 + ufo.beamPower * 0.30;
-  const alphaBot = 0.22 + ufo.beamPower * 0.22;
-
-  beamGrad.addColorStop(0, `rgba(167, 243, 208, ${alphaTop})`);
-  beamGrad.addColorStop(0.45, `rgba(110, 231, 183, ${alphaBot})`);
-  beamGrad.addColorStop(1, `rgba(52, 211, 153, 0.10)`);
-
-  ctx.fillStyle = beamGrad;
-  ctx.beginPath();
-  ctx.moveTo(ufo.x - topHalfW, beamTopY);
-  ctx.lineTo(ufo.x + topHalfW, beamTopY);
-  ctx.lineTo(ufo.x + bottomHalfW, H);
-  ctx.lineTo(ufo.x - bottomHalfW, H);
-  ctx.closePath();
-  ctx.fill();
-
-  // Các vòng sóng lực hút bay ngược từ dưới đất lên đĩa bay khi đang quét
-  if (gameState === 'SCANNING') {
-    ctx.strokeStyle = 'rgba(167, 243, 208, 0.45)';
-    ctx.lineWidth = 3;
-    for (let i = 0; i < 4; i++) {
-      const p = ((globalTime * 0.75 + i * 0.25) % 1);
-      const waveY = H - p * (H - beamTopY);
-      const waveW = topHalfW + (1 - p) * (bottomHalfW - topHalfW) * 0.75;
-      ctx.beginPath();
-      ctx.ellipse(ufo.x, waveY, waveW, 18, 0, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-  }
-  ctx.restore();
-}
-
-// Vẽ Xe Máy Tay Ga, Xe Taxi, Cột Đèn Đường (Giống ảnh mẫu)
-function drawStreetProps() {
-  anchors.forEach(a => {
-    ctx.save();
-    if (a.type === 'lamp_tall' || a.type === 'lamp_small') {
-      const isTall = a.type === 'lamp_tall';
-      ctx.strokeStyle = '#17212b';
-      ctx.fillStyle = '#17212b';
-      ctx.lineWidth = isTall ? 7 : 5;
-
-      // Thân cột đèn
-      ctx.beginPath();
-      ctx.moveTo(a.x, a.y);
-      ctx.lineTo(a.x, a.topY + 18);
-      // Cần đèn uốn cong sang phải
-      ctx.quadraticCurveTo(a.x, a.topY, a.x + (isTall ? 28 : 16), a.topY);
-      ctx.stroke();
-
-      // Chân đế cột đèn
-      ctx.fillRect(a.x - 7, a.y - 16, 14, 18);
-
-      // Chóa đèn & ánh sáng vàng
-      const lampX = a.x + (isTall ? 34 : 20);
-      ctx.fillStyle = '#0f172a';
-      ctx.beginPath();
-      ctx.ellipse(lampX, a.topY, isTall ? 15 : 10, 5, 0, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#fef08a';
-      ctx.beginPath();
-      ctx.ellipse(lampX, a.topY + 3, isTall ? 11 : 7, 3.5, 0, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (a.type.startsWith('scooter')) {
-      const bodyColor = a.type === 'scooter_red' ? '#991b1b' : (a.type === 'scooter_blue' ? '#1e3a8a' : '#27272a');
-      ctx.translate(a.x, a.y);
-      const sc = a.type === 'scooter_dark' ? 0.78 : 1;
-      ctx.scale(sc, sc);
-
-      // Bánh xe trước & sau
-      ctx.fillStyle = '#0f172a';
-      ctx.beginPath();
-      ctx.arc(-18, -8, 9, 0, Math.PI * 2);
-      ctx.arc(18, -8, 9, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.fillStyle = '#94a3b8';
-      ctx.beginPath();
-      ctx.arc(-18, -8, 4, 0, Math.PI * 2);
-      ctx.arc(18, -8, 4, 0, Math.PI * 2);
-      ctx.fill();
-
-      // Thân xe tay ga
-      ctx.fillStyle = bodyColor;
-      ctx.beginPath();
-      ctx.roundRect(-22, -25, 34, 16, 6);
-      ctx.fill();
-
-      // Cổ xe & đèn pha vàng
-      ctx.strokeStyle = bodyColor;
-      ctx.lineWidth = 5;
-      ctx.beginPath();
-      ctx.moveTo(12, -16);
-      ctx.lineTo(18, -38);
-      ctx.stroke();
-
-      ctx.fillStyle = '#fef08a';
-      ctx.beginPath();
-      ctx.arc(20, -38, 4.5, 0, Math.PI * 2);
-      ctx.fill();
-    } else if (a.type === 'taxi') {
-      ctx.translate(a.x, a.y);
-      // Thân dưới xe hơi
-      ctx.fillStyle = '#334155';
-      ctx.beginPath();
-      ctx.roundRect(-55, -28, 110, 20, 6);
-      ctx.fill();
-      // Mui xe
-      ctx.beginPath();
-      ctx.moveTo(-36, -28);
-      ctx.lineTo(-22, -48);
-      ctx.lineTo(24, -48);
-      ctx.lineTo(38, -28);
-      ctx.closePath();
-      ctx.fill();
-      // Cửa kính xe
-      ctx.fillStyle = '#94a3b8';
-      ctx.fillRect(-19, -44, 17, 13);
-      ctx.fillRect(3, -44, 18, 13);
-      // Mào TAXI trên nóc
-      ctx.fillStyle = '#e2e8f0';
-      ctx.fillRect(-10, -54, 20, 6);
-      // Bánh xe
-      ctx.fillStyle = '#0f172a';
-      ctx.beginPath();
-      ctx.arc(-32, -8, 11, 0, Math.PI * 2);
-      ctx.arc(32, -8, 11, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.restore();
-  });
-}
-
-// Vẽ Đĩa Bay UFO Khổng Lồ (Nắp kính Alien xanh, Đèn màu, Bảng đếm 0/3)
-function drawUFO() {
-  ctx.save();
-  ctx.translate(ufo.x, ufo.y);
-
-  // Độ nghiêng nhẹ khi UFO lượn
-  const tilt = Math.sin(globalTime * 1.8) * 0.025;
-  ctx.rotate(tilt);
-
-  const saucerW = Math.min(W * 0.36, 330);
-  const saucerH = 52;
-
-  // 1. Vòm kính trong suốt phía trên
-  ctx.fillStyle = 'rgba(186, 230, 253, 0.32)';
-  ctx.strokeStyle = 'rgba(224, 242, 254, 0.7)';
-  ctx.lineWidth = 2.5;
-  ctx.beginPath();
-  ctx.arc(0, -14, saucerW * 0.33, Math.PI, 0);
-  ctx.fill();
-  ctx.stroke();
-
-  // 2. Hai râu ăng-ten màu xanh lá của Alien nhô lên trong vòm kính (Giống hệt ảnh!)
-  const antWave = Math.sin(globalTime * 6) * 3;
-  ctx.strokeStyle = '#84cc16';
-  ctx.fillStyle = '#a3e635';
-  ctx.lineWidth = 4;
-
-  // Râu trái
-  ctx.beginPath();
-  ctx.moveTo(-28, -28);
-  ctx.lineTo(-34 + antWave, -48);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(-34 + antWave, -48, 5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Râu phải
-  ctx.beginPath();
-  ctx.moveTo(28, -28);
-  ctx.lineTo(34 - antWave, -48);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.arc(34 - antWave, -48, 5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Đầu Alien thấp thoáng trong vòm kính
-  ctx.fillStyle = 'rgba(132, 204, 22, 0.65)';
-  ctx.beginPath();
-  ctx.arc(-26, -20, 14, Math.PI, 0);
-  ctx.arc(26, -20, 14, Math.PI, 0);
-  ctx.fill();
-
-  // 3. Thân đĩa bay trắng bạc bầu dục
-  const bodyGrad = ctx.createLinearGradient(0, -saucerH, 0, saucerH);
-  bodyGrad.addColorStop(0, '#f8fafc');
-  bodyGrad.addColorStop(0.55, '#e2e8f0');
-  bodyGrad.addColorStop(1, '#94a3b8');
-
-  ctx.fillStyle = bodyGrad;
-  ctx.beginPath();
-  ctx.ellipse(0, 0, saucerW, saucerH, 0, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Đường viền ngang thân đĩa bay
-  ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 2;
-  ctx.beginPath();
-  ctx.ellipse(0, -6, saucerW * 0.96, saucerH * 0.65, 0, 0, Math.PI);
-  ctx.stroke();
-
-  // 4. Đèn màu tròn dọc hai bên mép dưới đĩa bay (Vàng, cam, xanh dương như ảnh)
-  const lightDots = [
-    { x: -saucerW * 0.76, y: 12, c: '#fde047' },
-    { x: -saucerW * 0.64, y: 18, c: '#fb923c' },
-    { x: -saucerW * 0.50, y: 23, c: '#38bdf8' },
-    { x: saucerW * 0.50, y: 23, c: '#38bdf8' },
-    { x: saucerW * 0.64, y: 18, c: '#fb923c' },
-    { x: saucerW * 0.76, y: 12, c: '#fde047' }
-  ];
-  lightDots.forEach((ld, idx) => {
-    const pulse = (Math.floor(globalTime * 5) + idx) % 2 === 0 ? 1 : 0.45;
-    ctx.fillStyle = ld.c;
-    ctx.globalAlpha = pulse;
-    ctx.beginPath();
-    ctx.ellipse(ld.x, ld.y, 8, 5, 0, 0, Math.PI * 2);
-    ctx.fill();
-  });
-  ctx.globalAlpha = 1;
-
-  // 5. Đế phát tia sáng xanh ngọc dưới bụng UFO
-  ctx.fillStyle = '#6ee7b7';
-  ctx.strokeStyle = '#34d399';
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.ellipse(0, saucerH * 0.62, saucerW * 0.25, 13, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.stroke();
-
-  // 6. Bảng điện tử đếm số học sinh "0 / 3" ngay chính giữa mặt trước UFO (Chuẩn ảnh mẫu!)
-  const boardW = 92;
-  const boardH = 34;
-  ctx.fillStyle = '#11302a';
-  ctx.strokeStyle = '#cbd5e1';
-  ctx.lineWidth = 2.5;
-  ctx.beginPath();
-  ctx.roundRect(-boardW / 2, -boardH / 2 + 2, boardW, boardH, 7);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = '#ecfdf5';
-  ctx.font = '800 19px "Be Vietnam Pro", sans-serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(`${ufo.caughtCount} / ${ufo.totalToCatch}`, 0, 3);
-
-  ctx.restore();
-}
-
-// =====================================================
-// 5. VẼ HỌC SINH BÁM CỘT ĐÈN & THẺ TÊN TRẮNG KEM GIỐNG ẢNH
-// =====================================================
-function drawStudentAndTag(s) {
-  if (s.state === 'ABDUCTED') return;
-
-  ctx.save();
-  ctx.translate(s.x, s.y);
-
-  // Quy mô nhỏ dần khi bị hút vào miệng đĩa bay
-  const scale = s.state === 'BEING_SUCKED' ? Math.max(0.25, 1 - s.suckProgress * 0.75) : 1;
-  ctx.scale(scale, scale);
-
-  // Vẽ cơ thể học sinh đang bám cột đèn/xe bị lực hút thổi bay ngang phần phật
-  ctx.save();
-  constextraFlutter = gameState === 'SCANNING' ? Math.sin(globalTime * 14 + s.phase) * 0.22 : Math.sin(globalTime * 4 + s.phase) * 0.08;
-  const rot = s.state === 'BEING_SUCKED' ? (globalTime * 8) : (s.bodyAngle + extraFlutter);
-  ctx.rotate(rot);
-
-  // Hai tay vươn ra bám chặt vào cột
-  ctx.strokeStyle = '#fed7aa';
-  ctx.lineWidth = 4;
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.lineTo(-4, -14);
-  ctx.moveTo(4, 0);
-  ctx.lineTo(4, -14);
-  ctx.stroke();
-
-  // Đầu học sinh
-  ctx.fillStyle = '#fed7aa';
-  ctx.beginPath();
-  ctx.arc(0, -6, 7.5, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Tóc
-  ctx.fillStyle = s.hairColor;
-  ctx.beginPath();
-  ctx.arc(0, -8, 7.8, Math.PI * 0.85, Math.PI * 2.15);
-  ctx.fill();
-
-  // Áo học sinh
-  ctx.fillStyle = s.shirtColor;
-  ctx.strokeStyle = '#1e293b';
-  ctx.lineWidth = 1.2;
-  ctx.beginPath();
-  ctx.roundRect(-7, 1, 14, 16, 4);
-  ctx.fill();
-  ctx.stroke();
-
-  // Quần & Hai chân đập loạn xạ trong không trung
-  const legKick = Math.sin(globalTime * 18 + s.phase) * 6;
-  ctx.strokeStyle = s.pantsColor;
-  ctx.lineWidth = 4.5;
-  ctx.beginPath();
-  ctx.moveTo(-4, 16);
-  ctx.lineTo(-6 + legKick, 29);
-  ctx.moveTo(4, 16);
-  ctx.lineTo(6 - legKick, 29);
-  ctx.stroke();
-
-  ctx.restore();
-
-  // Vẽ Thẻ Tên Màu Trắng Kem Bo Tròn phía trên (Chuẩn phong cách trong ảnh!)
-  drawCreamNamePill(0, -28, s.displayTag, s.state === 'BEING_SUCKED');
-
-  // Nếu bạn học sinh đang hét "Cứu em với!"
-  if (s.shoutText && s.shoutTimer > 0) {
-    drawHelpBubble(0, -52, s.shoutText);
-  }
-
-  ctx.restore();
-}
-
-function drawCreamNamePill(x, y, text, isHighlighted) {
-  ctx.font = '800 12px "Be Vietnam Pro", sans-serif';
-  const textW = ctx.measureText(text).width;
-  const boxW = textW + 22;
-  const boxH = 25;
-
-  // Đổ bóng nhẹ
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.18)';
-  ctx.beginPath();
-  ctx.roundRect(x - boxW / 2 + 1, y - boxH / 2 + 2, boxW, boxH, 12);
-  ctx.fill();
-
-  // Nền trắng kem giống ảnh mẫu
-  ctx.fillStyle = isHighlighted ? '#fef08a' : '#f5f2eb';
-  ctx.strokeStyle = isHighlighted ? '#ef4444' : 'rgba(255,255,255,0.9)';
-  ctx.lineWidth = isHighlighted ? 2.2 : 1.5;
-  ctx.beginPath();
-  ctx.roundRect(x - boxW / 2, y - boxH / 2, boxW, boxH, 12);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = isHighlighted ? '#991b1b' : '#27272a';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(text, x, y + 0.5);
-}
-
-function drawHelpBubble(x, y, text) {
-  ctx.font = '800 12px "Be Vietnam Pro", sans-serif';
-  const textW = ctx.measureText(text).width;
-  const boxW = textW + 18;
-  const boxH = 22;
-
-  ctx.fillStyle = '#ffffff';
-  ctx.strokeStyle = '#10b981';
-  ctx.lineWidth = 1.8;
-  ctx.beginPath();
-  ctx.roundRect(x - boxW / 2, y - boxH / 2, boxW, boxH, 10);
-  ctx.fill();
-  ctx.stroke();
-
-  ctx.fillStyle = '#0f172a';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.fillText(text, x, y + 0.5);
-}
-
-// =====================================================
-// 6. LOGIC QUÉT & HÚT HỌC SINH LÊN ĐĨA BAY UFO
-// =====================================================
-function startUfoScan() {
-  if (gameState === 'SCANNING' || students.length === 0) return;
-
-  targetCatchCount = parseInt(document.getElementById('select-abduct-count').value, 10) || 3;
-  createStudents();
-
-  gameState = 'SCANNING';
-  scanTimer = 0;
-  ufo.caughtCount = 0;
-  ufo.totalToCatch = Math.min(targetCatchCount, students.length);
-
-  // Chọn ngẫu nhiên các bạn sẽ bị tuột tay bay lên UFO
-  const indices = [...Array(students.length).keys()].sort(() => Math.random() - 0.5);
-  const victimIds = indices.slice(0, ufo.totalToCatch);
-  victimIds.forEach(idx => {
-    students[idx].isChosenVictim = true;
-  });
-
-  // Lên lịch thời điểm từng bạn bị tuột tay hút lên đĩa bay (Kéo dài hồi hộp)
-  nextAbductTime = 2.4;
-
-  const btn = document.getElementById('btn-start-scan');
-  btn.disabled = true;
-  btn.innerHTML = '<span>🚫 UFO đang quét...</span>';
-  document.getElementById('banner-status-text').innerText = 'Bám chặt nhé! UFO đang tăng công suất hút...';
-
-  playSound('beam_on');
-  startUfoHum();
-}
-
-let lastFrame = performance.now();
-
-function updateLoop(dt) {
-  globalTime += dt;
-
-  // UFO lơ lửng trên bầu trời
-  ufo.y = ufo.baseY + Math.sin(globalTime * 2.2) * 6;
-
-  if (gameState === 'SCANNING') {
-    scanTimer += dt;
-    ufo.beamPower = Math.min(1, ufo.beamPower + dt * 1.5);
-
-    // Đĩa bay đảo nhẹ qua lại dò tín hiệu
-    ufo.x = W * 0.48 + Math.sin(scanTimer * 1.5) * (W * 0.08);
-
-    // Random tiếng kêu "Cứu em với!" giống trong ảnh
-    if (Math.random() < 0.09) {
-      const clinging = students.filter(s => s.state === 'CLINGING');
-      if (clinging.length > 0) {
-        const randS = clinging[Math.floor(Math.random() * clinging.length)];
-        if (randS.shoutTimer <= 0) {
-          randS.shoutText = PANIC_SHOUTS[Math.floor(Math.random() * PANIC_SHOUTS.length)];
-          randS.shoutTimer = 1.9;
+    <!-- MODAL HIỆN THÔNG BÁO HỌC SINH ĐƯỢC CHỌN -->
+    <div id="congrats-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-gradient-to-b from-slate-900 to-slate-800 border-2 border-emerald-500/60 rounded-3xl p-8 max-w-md w-full text-center shadow-[0_0_50px_rgba(16,185,129,0.4)] transform animate-scaleUp">
+            <div class="w-20 h-20 bg-emerald-500/20 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 text-4xl border border-emerald-500/40">
+                <i class="fa-solid fa-trophy"></i>
+            </div>
+            <p class="text-emerald-400 font-semibold tracking-wider text-sm uppercase mb-1">🎉 Tên Học Sinh Được Chọn 🎉</p>
+            <h2 id="winner-name" class="text-4xl font-extrabold text-white my-3 drop-shadow-md">Cao Xuân Tiên</h2>
+            <p class="text-slate-300 text-sm mb-6">UFO đã tóm gọn thành công học sinh này! Sẵn sàng câu hỏi tiếp theo nhé giáo viên ơi.</p>
+            <button onclick="closeModal()" class="w-full bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold py-3.5 rounded-xl shadow-lg transition text-lg">
+                Tiếp Tục Gọi <i class="fa-solid fa-arrow-right ml-2"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- MODAL CÀI ĐẶT DANH SÁCH HỌC SINH -->
+    <div id="settings-modal" class="fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-md hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-700 rounded-3xl p-6 max-w-lg w-full shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-list-check text-emerald-400"></i>
+                    <span>Tùy Chỉnh Danh Sách Học Sinh</span>
+                </h3>
+                <button onclick="closeSettings()" class="text-slate-400 hover:text-white text-xl">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <p class="text-slate-400 text-sm mb-3">Nhập danh sách tên học sinh (mỗi tên một dòng hoặc cách nhau bằng dấu phẩy):</p>
+            <textarea id="student-input" rows="7" class="w-full bg-slate-950 border border-slate-700 rounded-xl p-3 text-white focus:outline-none focus:border-emerald-500 font-mono text-sm leading-relaxed"></textarea>
+            
+            <div class="mt-6 flex justify-end space-x-3">
+                <button onclick="closeSettings()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold px-5 py-2.5 rounded-xl transition">
+                    Hủy
+                </button>
+                <button onclick="saveStudentList()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold px-6 py-2.5 rounded-xl shadow transition">
+                    Lưu & Cập Nhật
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCRIPT XỬ LÝ TRÒ CHƠI -->
+    <script>
+        // Danh sách học sinh mặc định phong phú như hình mẫu
+        let defaultStudents = [
+            "Cao Xuân Tiên", "Đỗ Văn Khánh", "Hoàng Đức", "Đào Đức Thảo", 
+            "Nguyễn Hoàng Anh", "Nguyễn Quang", "Đỗ Thế Khánh", "Cao Minh Quân", 
+            "Đinh Tiến Đạt", "Nguyễn Văn Hùng", "Vũ Phạm Quỳnh", "Hoàng Thế Long"
+        ];
+
+        let students = [...defaultStudents];
+        let calledStudents = [];
+        let isCalling = false;
+
+        // Khởi tạo các ngôi sao nền
+        const starsLayer = document.getElementById('stars-layer');
+        for (let i = 0; i < 40; i++) {
+            const star = document.createElement('div');
+            star.className = 'absolute bg-white rounded-full';
+            const size = Math.random() * 3 + 1;
+            star.style.width = `${size}px`;
+            star.style.height = `${size}px`;
+            star.style.top = `${Math.random() * 70}%`;
+            star.style.left = `${Math.random() * 100}%`;
+            star.style.opacity = Math.random();
+            starsLayer.appendChild(star);
         }
-      }
-    }
 
-    // Kiểm tra đến giờ hút 1 bạn học sinh lên UFO
-    if (scanTimer >= nextAbductTime) {
-      const nextVictim = students.find(s => s.isChosenVictim && s.state === 'CLINGING');
-      if (nextVictim) {
-        nextVictim.state = 'BEING_SUCKED';
-        nextVictim.shoutText = "Á á cứu em với!!";
-        nextVictim.shoutTimer = 2.5;
-        playSound('suck_up');
-        nextAbductTime = scanTimer + 2.1; // Cách nhau 2.1 giây mỗi bạn
-      }
-    }
+        // Render học sinh ra màn hình đường phố
+        function renderStudents() {
+            const container = document.getElementById('students-grid');
+            container.innerHTML = '';
+            
+            students.forEach((name, index) => {
+                const isCalled = calledStudents.includes(name);
+                
+                const card = document.createElement('div');
+                card.id = `student-card-${index}`;
+                card.className = `relative flex flex-col items-center transition-all duration-500 ${isCalled ? 'opacity-30 scale-90 grayscale' : 'opacity-100 hover:scale-105'}`;
+                
+                card.innerHTML = `
+                    <!-- Bong bóng tên học sinh -->
+                    <div class="mb-2 bg-slate-900/90 text-white font-semibold text-xs sm:text-sm px-3 py-1.5 rounded-xl shadow-lg border border-slate-700 whitespace-nowrap flex items-center space-x-1.5">
+                        <span class="w-2 h-2 rounded-full ${isCalled ? 'bg-slate-500' : 'bg-emerald-400 animate-pulse'}"></span>
+                        <span>${name}</span>
+                    </div>
+                    <!-- Nhân vật và xe máy SVG dễ thương -->
+                    <div class="relative flex items-center justify-center">
+                        <svg class="w-16 h-16 sm:w-20 sm:h-20 drop-shadow-lg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <!-- Xe máy scooter đơn giản -->
+                            <path d="M25 75L40 75L55 85L75 85" stroke="#94a3b8" stroke-width="4" stroke-linecap="round"/>
+                            <circle cx="35" cy="85" r="9" fill="#334155" stroke="#cbd5e1" stroke-width="3"/>
+                            <circle cx="70" cy="85" r="9" fill="#334155" stroke="#cbd5e1" stroke-width="3"/>
+                            <!-- Học sinh ngồi cạnh xe -->
+                            <circle cx="50" cy="45" r="12" fill="#fbbf24"/>
+                            <path d="M38 70C38 58 43 55 50 55C57 55 62 58 62 70" fill="#3b82f6"/>
+                            <path d="M45 42L55 42" stroke="#1e293b" stroke-width="2" stroke-linecap="round"/>
+                        </svg>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
 
-    // Cập nhật từng học sinh
-    students.forEach(s => {
-      if (s.shoutTimer > 0) s.shoutTimer -= dt;
-
-      if (s.state === 'CLINGING') {
-        // Bị lực hút UFO kéo rung lắc mạnh quanh cột đèn/xe máy
-        s.x = s.anchorX + Math.sin(globalTime * 10 + s.phase) * 5;
-        s.y = s.anchorY - 8 + Math.cos(globalTime * 8 + s.phase) * 4;
-      } else if (s.state === 'BEING_SUCKED') {
-        s.suckProgress += dt * 0.72;
-        const targetX = ufo.x;
-        const targetY = ufo.y + 30;
-        s.x += (targetX - s.x) * dt * 3.8;
-        s.y += (targetY - s.y) * dt * 3.2;
-
-        if (Math.hypot(targetX - s.x, targetY - s.y) < 22 || s.suckProgress >= 1) {
-          s.state = 'ABDUCTED';
-          abductedStudents.push(s);
-          ufo.caughtCount = abductedStudents.length;
-
-          // Nếu đã hút đủ số lượng học sinh yêu cầu (VD: 3/3)
-          if (ufo.caughtCount >= ufo.totalToCatch) {
-            setTimeout(finishScanAndShowResult, 700);
-          }
+            updateCounter();
+            document.getElementById('student-input').value = students.join('\n');
         }
-      }
-    });
-  } else {
-    // Trạng thái chờ
-    ufo.beamPower = Math.max(0.25, ufo.beamPower - dt);
-    ufo.x += (W * 0.48 - ufo.x) * dt * 2;
-    students.forEach(s => {
-      if (s.state === 'CLINGING') {
-        s.x = s.anchorX + Math.sin(globalTime * 2.5 + s.phase) * 2;
-        s.y = s.anchorY + Math.cos(globalTime * 2.5 + s.phase) * 2;
-      }
-    });
-  }
-}
 
-function finishScanAndShowResult() {
-  if (gameState === 'RESULT') return;
-  gameState = 'RESULT';
-  stopUfoHum();
-  playSound('complete');
+        function updateCounter() {
+            document.getElementById('counter-displayinnerText') || (document.getElementById('counter-display').innerText = `${calledStudents.length} / ${students.length} học sinh`);
+        }
 
-  const btn = document.getElementById('btn-start-scan');
-  btn.disabled = false;
-  btn.innerHTML = '<span>🛸 Bắt đầu quét bắt</span>';
-  document.getElementById('banner-status-text').innerText = 'Bám chặt nhé! UFO đang dò tín hiệu...';
+        // Bắt đầu quy trình UFO gọi học sinh
+        function callStudent() {
+            if (isCalling) return;
+            const remaining = students.filter(s => !calledStudents.includes(s));
+            if (remaining.length === 0) {
+                showModal("Đã gọi hết tất cả học sinh trong danh sách!");
+                return;
+            }
 
-  const box = document.getElementById('abducted-results-box');
-  box.innerHTML = '';
+            isCalling = true;
+            const callBtn = document.getElementById('call-btn');
+            callBtn.disabled = true;
+            callBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
-  abductedStudents.forEach((st, idx) => {
-    const card = document.createElement('div');
-    card.className = 'abducted-student-item';
-    card.style.animationDelay = `${idx * 0.15}s`;
-    card.innerHTML = `
-      <div class="abducted-avatar-circle">🧑‍🎓</div>
-      <div class="abducted-name">${st.fullName}</div>
-      <div class="abducted-sub">★ Lượt bắt #${idx + 1} - Mời trả bài ★</div>
-    `;
-    box.appendChild(card);
-  });
+            const statusHeader = document.getElementById('header-status');
+            statusHeader.innerText = "UFO đang quét tìm học sinh...";
 
-  document.getElementById('result-overlay').style.display = 'flex';
-}
+            // UFO di chuyển ngẫu nhiên trên màn hình trước khi chọn
+            const ufoWrapper = document.getElementById('ufo-wrapper');
+            let steps = 0;
+            const randomMoveInterval = setInterval(() => {
+                steps++;
+                const randomX = (Math.random() - 0.5) * 60; // Dịch chuyển qua lại
+                ufoWrapper.style.transform = `translateX(calc(-50% + ${randomX}vw))`;
+                if (steps > 6) {
+                    clearInterval(randomMoveInterval);
+                    ufoWrapper.style.transform = `translateX(-50%)`; // Trở về giữa
+                    selectRandomStudent(remaining);
+                }
+            }, 300);
+        }
 
-function renderLoop(now) {
-  const dt = Math.min((now - lastFrame) / 1000, 0.1);
-  lastFrame = now;
+        // Chọn ngẫu nhiên học sinh còn lại và kích hoạt hiệu ứng hút
+        function selectRandomStudent(remainingList) {
+            const chosenName = remainingList[Math.floor(Math.random() * remainingList.length)];
+            const originalIndex = students.indexOf(chosenName);
 
-  updateLoop(dt);
+            const statusHeader = document.getElementById('header-status');
+            statusHeader.innerText = `Đã khóa mục tiêu: ${chosenName}!`;
 
-  ctx.clearRect(0, 0, W, H);
-  drawNightCityBackground();
-  drawTractorBeam();
-  drawStreetProps();
+            // Định vị UFO dịch đến vị trí gần học sinh (nếu muốn, hoặc chiếu thẳng xuống)
+            const cardElement = document.getElementById(`student-card-${originalIndex}`);
+            if (cardElement) {
+                cardElement.classList.add('student-beaming');
+            }
 
-  // Vẽ các học sinh đang bám dưới phố trước, học sinh đang bay lên UFO vẽ sau
-  students.forEach(s => {
-    if (s.state === 'CLINGING') drawStudentAndTag(s);
-  });
-  students.forEach(s => {
-    if (s.state === 'BEING_SUCKED') drawStudentAndTag(s);
-  });
+            // Sau hiệu ứng bay lên, hiển thị modal chúc mừng
+            setTimeout(() => {
+                calledStudents.push(chosenName);
+                renderStudents();
 
-  drawUFO();
+                document.getElementById('winner-name').innerText = chosenName;
+                document.getElementById('congrats-modal').classList.remove('hidden');
 
-  requestAnimationFrame(renderLoop);
-}
+                const callBtn = document.getElementById('call-btn');
+                callBtn.disabled = false;
+                callBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+                statusHeader.innerText = "UFO đang dò tín hiệu...";
+                isCalling = false;
+            }, 1500);
+        }
 
-// =====================================================
-// 7. SỰ KIỆN NÚT BẤM & QUẢN LÝ LƯU TRỮ DANH SÁCH LỚP
-// =====================================================
-document.getElementById('btn-start-scan').addEventListener('click', startUfoScan);
+        function closeModal() {
+            document.getElementById('congrats-modal').classList.add('hidden');
+        }
 
-document.getElementById('btn-play-again').addEventListener('click', () => {
-  document.getElementById('result-overlay').style.display = 'none';
-  gameState = 'IDLE';
-  createStudents();
-});
+        function openSettings() {
+            document.getElementById('settings-modal').classList.remove('hidden');
+        }
 
-document.getElementById('select-abduct-count').addEventListener('change', (e) => {
-  targetCatchCount = parseInt(e.target.value, 10) || 3;
-  ufo.totalToCatch = Math.min(targetCatchCount, studentNames.length);
-  saveToLocalStorage("");
-});
+        function closeSettings() {
+            document.getElementById('settings-modal').classList.add('hidden');
+        }
 
-document.getElementById('btn-sound-toggle').addEventListener('click', () => {
-  soundEnabled = !soundEnabled;
-  if (!soundEnabled) stopUfoHum();
-  showToast(soundEnabled ? "Đã bật âm thanh" : "Đã tắt âm thanh");
-});
+        function saveStudentList() {
+            const rawText = document.getElementById('student-input').value;
+            const newNames = rawText
+                .split(/[\n,]+/)
+                .map(s => s.trim())
+                .filter(s => s.length > 0);
 
-document.getElementById('btn-fullscreen').addEventListener('click', () => {
-  if (!document.fullscreenElement) {
-    document.documentElement.requestFullscreen().catch(() => {});
-  } else {
-    document.exitFullscreen().catch(() => {});
-  }
-});
+            if (newNames.length === 0) {
+                alert("Danh sách không được để trống!");
+                return;
+            }
 
-// Mở Modal Chỉnh sửa danh sách học sinh (Khi bấm vào nút cây bút hoặc huy hiệu "33 học sinh")
-const settingsModal = document.getElementById('settings-modal');
-const inputClassName = document.getElementById('input-class-name');
-const inputStudentCount = document.getElementById('input-student-count');
-const inputStudentList = document.getElementById('input-student-list');
-const inputCatchCount = document.getElementById('input-catch-count');
-const lblNumCount = document.getElementById('lbl-num-count');
-const savedClassesListEl = document.getElementById('saved-classes-list');
+            students = newNames;
+            calledStudents = [];
+            renderStudents();
+            closeSettings();
+        }
 
-function openSettingsModal() {
-  inputClassName.value = className;
-  inputCatchCount.value = String(targetCatchCount);
-  inputStudentCount.value = studentNames.length;
-  lblNumCount.innerText = studentNames.length;
-  inputStudentList.value = studentNames.join('\n');
-  renderSavedClassChips();
-  settingsModal.style.display = 'flex';
-}
+        function resetGame() {
+            calledStudents = [];
+            renderStudents();
+            document.getElementById('header-status').innerText = "UFO đang dò tín hiệu...";
+        }
 
-document.getElementById('btn-edit-pen').addEventListener('click', openSettingsModal);
-document.getElementById('btn-pill-roster').addEventListener('click', openSettingsModal);
-
-document.getElementById('btn-close-settings').addEventListener('click', () => {
-  settingsModal.style.display = 'none';
-});
-
-function renderSavedClassChips() {
-  savedClassesListEl.innerHTML = '';
-  const keys = Object.keys(savedClasses);
-  keys.forEach(k => {
-    const chip = document.createElement('div');
-    chip.className = 'class-chip' + (k === inputClassName.value.trim() ? ' active' : '');
-    chip.innerHTML = `<span>${k} (${(savedClasses[k] || []).length})</span>`;
-
-    if (keys.length > 1) {
-      const del = document.createElement('span');
-      del.className = 'del-chip';
-      del.innerText = '×';
-      del.addEventListener('click', (ev) => {
-        ev.stopPropagation();
-        delete savedClasses[k];
-        const rem = Object.keys(savedClasses);
-        className = rem[0];
-        studentNames = [...savedClasses[className]];
-        inputClassName.value = className;
-        inputStudentList.value = studentNames.join('\n');
-        inputStudentCount.value = studentNames.length;
-        lblNumCount.innerText = studentNames.length;
-        saveToLocalStorage("Đã xóa lớp!");
-        renderSavedClassChips();
-      });
-      chip.appendChild(del);
-    }
-
-    chip.addEventListener('click', () => {
-      className = k;
-      studentNames = [...savedClasses[k]];
-      inputClassName.value = className;
-      inputStudentList.value = studentNames.join('\n');
-      inputStudentCount.value = studentNames.length;
-      lblNumCount.innerText = studentNames.length;
-      renderSavedClassChips();
-    });
-
-    savedClassesListEl.appendChild(chip);
-  });
-}
-
-document.getElementById('btn-new-class').addEventListener('click', () => {
-  const newName = `Lớp Mới ${Object.keys(savedClasses).length + 1}`;
-  savedClasses[newName] = [...DEFAULT_UFO_NAMES];
-  className = newName;
-  studentNames = [...DEFAULT_UFO_NAMES];
-  inputClassName.value = className;
-  inputStudentList.value = studentNames.join('\n');
-  inputStudentCount.value = studentNames.length;
-  lblNumCount.innerText = studentNames.length;
-  renderSavedClassChips();
-});
-
-function adjustStudentListByCount(newCount) {
-  newCount = Math.max(2, Math.min(65, parseInt(newCount, 10) || 33));
-  inputStudentCount.value = newCount;
-  lblNumCount.innerText = newCount;
-
-  let lines = inputStudentList.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
-  if (lines.length < newCount) {
-    for (let i = lines.length; i < newCount; i++) {
-      const sample = DEFAULT_UFO_NAMES[i % DEFAULT_UFO_NAMES.length];
-      lines.push(lines.includes(sample) ? `HỌC SINH ${i + 1}` : sample);
-    }
-  } else if (lines.length > newCount) {
-    lines = lines.slice(0, newCount);
-  }
-  inputStudentList.value = lines.join('\n');
-}
-
-inputStudentCount.addEventListener('input', (e) => adjustStudentListByCount(e.target.value));
-
-document.querySelectorAll('.quick-btn[data-count]').forEach(btn => {
-  btn.addEventListener('click', () => {
-    adjustStudentListByCount(parseInt(btn.getAttribute('data-count'), 10));
-  });
-});
-
-inputStudentList.addEventListener('input', () => {
-  const lines = inputStudentList.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
-  inputStudentCount.value = lines.length;
-  lblNumCount.innerText = lines.length;
-});
-
-document.getElementById('btn-save-settings').addEventListener('click', () => {
-  className = inputClassName.value.trim() || "Lớp 10A1";
-  targetCatchCount = parseInt(inputCatchCount.value, 10) || 3;
-
-  const lines = inputStudentList.value.split('\n').map(s => s.trim()).filter(s => s.length > 0);
-  if (lines.length > 0) {
-    studentNames = lines;
-  }
-
-  saveToLocalStorage("Đã lưu danh sách học sinh! Lần sau mở lên sẽ có sẵn.");
-  settingsModal.style.display = 'none';
-  gameState = 'IDLE';
-  createStudents();
-});
-
-// Nhập / Xuất file .txt
-document.getElementById('btn-export-txt').addEventListener('click', () => {
-  const blob = new Blob([inputStudentList.value.trim()], { type: 'text/plain;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `Danh_sach_UFO_${className.replace(/\s+/g, '_')}.txt`;
-  a.click();
-  URL.revokeObjectURL(url);
-});
-
-document.getElementById('btn-import-txt').addEventListener('click', () => {
-  document.getElementById('file-import').click();
-});
-
-document.getElementById('file-import').addEventListener('change', (e) => {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = (ev) => {
-    const lines = ev.target.result.split(/\r?\n/).map(s => s.trim()).filter(s => s.length > 0);
-    if (lines.length > 0) {
-      inputStudentList.value = lines.join('\n');
-      inputStudentCount.value = lines.length;
-      lblNumCount.innerText = lines.length;
-      showToast(`Đã nạp ${lines.length} học sinh từ file!`);
-    }
-  };
-  reader.readAsText(file, 'UTF-8');
-});
-
-// Khởi chạy khi font chữ Tiếng Việt đã sẵn sàng
-document.fonts.ready.then(() => {
-  initStars();
-  createStudents();
-  requestAnimationFrame(renderLoop);
-});
-</script>
+        // Khởi chạy ban đầu
+        window.onload = function() {
+            renderStudents();
+        };
+    </script>
 </body>
 </html>
